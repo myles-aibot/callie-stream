@@ -6,8 +6,9 @@ from starlette.websockets import WebSocket, WebSocketDisconnect
 from starlette.applications import Starlette
 from starlette.routing import WebSocketRoute
 from openai import AsyncOpenAI
-from agents import Agent
-from agents.voice import VoicePipeline, AudioInput, SingleAgentVoiceWorkflow
+from agents_sdk.agents import Agent
+from agents_sdk.agents.voice import AudioInput, VoicePipeline, SingleAgentVoiceWorkflow
+
 
 # 🔐 OpenAI API key
 openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
