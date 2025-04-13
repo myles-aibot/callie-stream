@@ -1,37 +1,35 @@
+import sys
+import os
 import asyncio
 import base64
 import json
-import os
 
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from starlette.applications import Starlette
 from starlette.routing import WebSocketRoute
 from openai import AsyncOpenAI
 
-# Import from vendored local agents-sdk
-from agents_sdk import Agent
-from agents_sdk.voice import VoicePipeline, AudioInput, SingleAgentVoiceWorkflow
+# 🔧 Force Python to use the vendored agents-sdk instead of pip version
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "agents-sdk")))
 
-# Initialize OpenAI client
+# ✅ Import from vendored SDK (no prefix needed now)
+from agents import Agent
+from agents.voice import VoicePipeline, AudioInput, SingleAgentVoiceWorkflow
+
+# 🔐 OpenAI client
 openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Define your agent
+# 🤖 Define Callie
 agent = Agent(
     name="Callie",
-    instructions=(
-        "You're a helpful, friendly receptionist. Greet the caller, ask how you can help, "
-        "and respond in a natural voice."
-    ),
+    instructions="You're a helpful, friendly receptionist. Greet the caller, ask how you can help, and respond in a natural voice.",
     model="gpt-4o"
 )
-
-# Set voice
 agent.voice = "alloy"
 
-# Set up the voice pipeline
 pipeline = VoicePipeline(workflow=SingleAgentVoiceWorkflow(agent))
 
-# WebSocket handler
+# 🎙️ WebSocket Handler
 async def handle_twilio_stream(websocket: WebSocket):
     await websocket.accept()
     print("📞 Twilio stream connected")
@@ -63,10 +61,10 @@ async def handle_twilio_stream(websocket: WebSocket):
 
     async for event in result.stream():
         if event.type == "voice_stream_event_audio":
-            print("🔊 Responding with audio (not yet returned to Twilio)")
-            # You’ll return audio back to Twilio in the next stage
+            print("🔊 Callie is speaking... (not returned to Twilio yet)")
+            # In future: stream back to Twilio here
 
-# Setup WebSocket route
+# 🛣️ Set up the WebSocket route
 routes = [
     WebSocketRoute("/media", handle_twilio_stream)
 ]
