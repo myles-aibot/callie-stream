@@ -1,6 +1,11 @@
+flask
+twilio
+gunicorn
 openai
 websockets
 starlette
 uvicorn
-openai-agents[voice] @ git+https://github.com/openai/openai-agents-python.git
 
+--no-cache-dir
+--force-reinstall
+openai-agents[voice] @ git+https://github.com/openai/openai-agents-python.git
