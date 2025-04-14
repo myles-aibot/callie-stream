@@ -21,7 +21,7 @@ openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 agent = Agent(
     name="Callie",
     instructions="You're a helpful, friendly receptionist named Callie. Greet callers, ask what they need help with, and respond in a natural, polite voice.",
-    model="gpt-4o"
+    model="gpt-4o-mini-2024-04-09"
 )
 agent.voice = "alloy"
 
