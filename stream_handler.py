@@ -2,33 +2,33 @@ import asyncio
 import base64
 import json
 import os
-import numpy as np
+import sys
+
+# ✅ Force Python to use local vendored agents-sdk
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "agents-sdk")))
 
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from starlette.applications import Starlette
 from starlette.routing import WebSocketRoute
-
 from openai import AsyncOpenAI
-from agents.voice import AudioInput, VoicePipeline, SingleAgentVoiceWorkflow
 from agents import Agent
+from agents.voice import VoicePipeline, AudioInput, SingleAgentVoiceWorkflow
 
+# 🔑 Set OpenAI API Key
 openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 🔁 Manual replacement for deprecated AudioInput.from_raw_bytes()
-def from_raw_bytes(raw_bytes: bytes, sample_rate: int = 8000) -> AudioInput:
-    buffer = np.frombuffer(raw_bytes, dtype=np.int16)
-    return AudioInput(buffer=buffer, frame_rate=sample_rate)
-
-# 🎙️ Define your GPT-4o voice agent
+# 🤖 Define Callie, our AI voice agent
 agent = Agent(
     name="Callie",
-    instructions="You're a helpful receptionist. Greet the caller and ask how you can help.",
-    model="gpt-4o",
+    instructions="You're a helpful, friendly receptionist named Callie. Greet callers, ask what they need help with, and respond in a natural, polite voice.",
+    model="gpt-4o"
 )
 agent.voice = "alloy"
 
+# 🎛️ Set up the voice pipeline
 pipeline = VoicePipeline(workflow=SingleAgentVoiceWorkflow(agent))
 
+# 🎧 Handle incoming Twilio audio streams
 async def handle_twilio_stream(websocket: WebSocket):
     await websocket.accept()
     print("📞 Twilio stream connected")
@@ -45,25 +45,27 @@ async def handle_twilio_stream(websocket: WebSocket):
                 audio_chunk = base64.b64decode(chunk_b64)
                 audio_chunks.append(audio_chunk)
 
-            if data.get("event") == "stop":
+            elif data.get("event") == "stop":
                 print("📴 Stream ended")
                 break
 
     except WebSocketDisconnect:
         print("🔌 WebSocket disconnected")
 
-    # 🧠 Process audio with Callie
-    raw_audio = b"".join(audio_chunks)
-    buffer = from_raw_bytes(raw_audio, sample_rate=8000)
+    # 🧠 Convert raw bytes to audio buffer
+    raw_audio = b''.join(audio_chunks)
+    buffer = AudioInput.from_raw_bytes(raw_audio, sample_rate=8000)
 
     print("🧠 Running Callie pipeline on received audio...")
+
     result = await pipeline.run(buffer)
 
-    # For now, just log the audio event (we’ll send it to Twilio soon)
     async for event in result.stream():
         if event.type == "voice_stream_event_audio":
-            print("🎤 Callie is speaking...")
+            print("🎤 Callie is speaking... (audio ready but not returned to Twilio)")
+            # TODO: stream back to Twilio in future versions
 
+# 🌐 WebSocket route
 routes = [
     WebSocketRoute("/media", handle_twilio_stream)
 ]
