@@ -5,7 +5,3 @@ openai
 websockets
 starlette
 uvicorn
-
---no-cache-dir
---force-reinstall
-openai-agents[voice] @ git+https://github.com/openai/openai-agents-python.git
