@@ -4,8 +4,8 @@ import json
 import os
 import sys
 
-# ✅ Force Python to use local vendored agents-sdk
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "agents-sdk")))
+# ✅ Fix: Ensure Python can locate vendored SDK modules in agents-sdk/src
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "agents-sdk", "src")))
 
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from starlette.applications import Starlette
