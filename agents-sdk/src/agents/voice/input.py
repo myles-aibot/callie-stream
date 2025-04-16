@@ -57,16 +57,16 @@ class AudioInput:
 
         return base64.b64encode(self.buffer.tobytes()).decode("utf-8")
 
-    # ✅ DEBUG-FRIENDLY: Add missing method
+    # ✅ This is the method you need to add for GPT-4o voice streaming to work
     @classmethod
     def from_raw_bytes(cls, raw_bytes: bytes, sample_rate: int = 8000) -> "AudioInput":
-        print("🧪 DEBUG: from_raw_bytes CALLED")
+        print("📦 DEBUG: from_raw_bytes called inside AudioInput")  # Optional debug
         audio_np = np.frombuffer(raw_bytes, dtype=np.int16)
         return cls(buffer=audio_np, frame_rate=sample_rate)
 
 
 class StreamedAudioInput:
-    """Audio input represented as a stream of audio data."""
+    """Audio input represented as a stream of audio data. Used in streaming voice mode."""
 
     def __init__(self):
         self.queue: asyncio.Queue[npt.NDArray[np.int16 | np.float32]] = asyncio.Queue()
