@@ -4,7 +4,8 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "agents-sdk")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "agents-sdk", "src")))
+
 
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from starlette.applications import Starlette
