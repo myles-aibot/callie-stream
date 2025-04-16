@@ -4,7 +4,7 @@ import json
 import os
 import sys
 
-# ✅ Fix: Ensure Python can locate vendored SDK modules in agents-sdk/src
+# ✅ Force Python to use local vendored agents-sdk
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "agents-sdk", "src")))
 
 from starlette.websockets import WebSocket, WebSocketDisconnect
@@ -54,6 +54,12 @@ async def handle_twilio_stream(websocket: WebSocket):
 
     # 🧠 Convert raw bytes to audio buffer
     raw_audio = b''.join(audio_chunks)
+    print(f"🧱 Collected {len(audio_chunks)} audio chunks")
+
+    if len(raw_audio) < 1000:
+        print("🚫 Not enough audio received. Skipping pipeline.")
+        return
+
     buffer = AudioInput.from_raw_bytes(raw_audio, sample_rate=8000)
 
     print("🧠 Running Callie pipeline on received audio...")
@@ -63,7 +69,6 @@ async def handle_twilio_stream(websocket: WebSocket):
     async for event in result.stream():
         if event.type == "voice_stream_event_audio":
             print("🎤 Callie is speaking... (audio ready but not returned to Twilio)")
-            # TODO: stream back to Twilio in future versions
 
 # 🌐 WebSocket route
 routes = [
